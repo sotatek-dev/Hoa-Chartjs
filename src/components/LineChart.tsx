@@ -98,7 +98,10 @@ const options = {
 			grid: {
 				display: false
 			},
-			min: 0
+			min: 0,
+			ticks: {
+				stepSize: 30
+			}
 		},
 		y1: {
 			position: "right" as const,
@@ -106,6 +109,7 @@ const options = {
 				drawOnChartArea: false
 			},
 			ticks: {
+				stepSize: 30,
 				callback: function (value: any, index: Number) {
 					return "$" + value;
 				}
