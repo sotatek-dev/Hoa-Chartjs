@@ -97,7 +97,8 @@ const options = {
 			position: "left" as const,
 			grid: {
 				display: false
-			}
+			},
+			min: 0
 		},
 		y1: {
 			position: "right" as const,
@@ -108,7 +109,8 @@ const options = {
 				callback: function (value: any, index: Number) {
 					return "$" + value;
 				}
-			}
+			},
+			min: 0
 		}
 	}
 };
