@@ -1,5 +1,5 @@
-import React, { MouseEvent, useRef, useEffect, useState } from "react";
-import type { InteractionItem, ChartData, ChartArea } from "chart.js";
+import React, { useRef, useEffect, useState } from "react";
+import type { ChartData, ChartArea } from "chart.js";
 import {
 	Chart as ChartJS,
 	CategoryScale,
@@ -40,7 +40,7 @@ const plugins = [
 	{
 		id: "draw-line",
 		afterDraw: (chart: { tooltip?: any; scales?: any; ctx?: any, chartArea: ChartArea }) => {
-			const { tooltip, scales, ctx, chartArea } = chart;
+			const { tooltip, scales, ctx } = chart;
 			if (tooltip._active && tooltip._active.length) {
 				const activePoint = tooltip._active[0];
 				const { x } = activePoint.element;
