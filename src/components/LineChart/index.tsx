@@ -13,7 +13,7 @@ import {
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 import zoomPlugin from 'chartjs-plugin-zoom';
-import { data } from './data';
+import { data, datasets } from './data';
 import { options } from './chartOptions'
 
 ChartJS.register(
@@ -46,41 +46,48 @@ const plugins = [
 				const { x } = activePoint.element;
 				const topY = scales.y.top;
 				const bottomY = scales.y.bottom;
+				// console.log("chart", scales.x);
 
 				// draw vertical line
 				ctx.save();
 				ctx.beginPath();
 				ctx.lineWidth = 1;
 				ctx.strokeStyle = "#ccc";
-				ctx.setLineDash([5, 5]);
+				ctx.setLineDash([10, 10]);
 				ctx.moveTo(x, topY);
 				ctx.lineTo(x, bottomY);
 				ctx.stroke();
 				ctx.restore();
-
 				// draw horizontal line
-
 				// ctx.save();
 				// ctx.lineWidth = 1;
 				// ctx.strokeStyle = "#ccc";
 				// ctx.setLineDash([5, 5]);
-				// ctx.strokeRect(chartArea.left, 10, chartArea.width, 0)
+				// ctx.strokeRect(chartArea.left, activePoint.element.y, chartArea.width, 0)
 				// ctx.stroke();
 				// ctx.restore();
 
 				// draw tooltip
-				// ctx.save();
-				// ctx.lineWidth = 1;
-				// ctx.strokeStyle = "#ccc";
-				// ctx.fillStyle = "rgb(236,239,241)"
-				// ctx.fillRect(x - 30, bottomY + 10, 60, 25);
-				// ctx.stroke();
-				// ctx.restore();
-				// ctx.fillText("1990", x - 15, bottomY + 25);
+				ctx.save();
+				ctx.strokeStyle = "#ccc";
+				ctx.fillStyle = "rgb(236,239,241)";
+				ctx.fillRect(x - 30, bottomY + 10, 60, 25);
+				ctx.restore();
+				ctx.font = "10pt Open Sans";
+				ctx.fillText(data.labels[activePoint.index], x - 15, bottomY + 23);
+
+				ctx.save();
+				ctx.beginPath();
+				ctx.lineWidth = 0.2;
+				ctx.strokeStyle = "#000";
+				ctx.rect(x - 30, bottomY + 10, 60, 25);
+				ctx.stroke();
+				ctx.restore();
 			}
 		}
 	}
 ];
+
 
 export function LineChartComponent() {
 	const chartRef = useRef<ChartJS<"line", number[], string>>(null);
@@ -95,14 +102,15 @@ export function LineChartComponent() {
 		}
 		const chartData = {
 			...data,
-			datasets: data.datasets.map((dataset) => ({
+			datasets: data.datasets.map((dataset, index) => ({
 				...dataset,
-				backgroundColor: createGradient(dataset.backgroundColor, chart.ctx, chart.chartArea)
+				backgroundColor: createGradient(dataset.backgroundColor, chart.ctx, chart.chartArea),
+				data: datasets[index].data,
+				order: index
 			}))
 		};
 		setChartData(chartData);
 	}, []);
-
 
 	return (
 		<Line

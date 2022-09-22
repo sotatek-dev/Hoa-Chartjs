@@ -1,9 +1,51 @@
+import { Chart, Tooltip, TooltipItem, TooltipModel } from "chart.js";
+import { Context } from "react";
+const getOrCreateTooltip = (chart: any) => {
+    let tooltipEl = chart.canvas.parentNode.querySelector('div');
+
+    if (!tooltipEl) {
+        tooltipEl = document.createElement('div');
+        tooltipEl.style.background = 'rgba(0, 0, 0, 0.7)';
+        tooltipEl.style.borderRadius = '3px';
+        tooltipEl.style.color = 'white';
+        tooltipEl.style.opacity = 1;
+        tooltipEl.style.pointerEvents = 'none';
+        tooltipEl.style.position = 'absolute';
+        tooltipEl.style.transform = 'translate(-50%, 0)';
+        tooltipEl.style.transition = 'all .1s ease';
+
+        const table = document.createElement('table');
+        table.style.margin = '0px';
+
+        tooltipEl.appendChild(table);
+        chart.canvas.parentNode.appendChild(tooltipEl);
+    }
+
+    return tooltipEl;
+};
 export const options = {
     animation: {
-        duration: 1000,
-        easing: "easeInQuad" as const,
-        onComplete: function (chart: any) {
-            // console.log(chart);
+        delay: (context: any) => {
+            let delay = 0;
+            if (context.type === 'data' && context.mode === 'default') {
+                delay = context.dataIndex * 300 + context.datasetIndex * 100;
+            }
+            return delay;
+        }
+    },
+    transitions: {
+        show: {
+            animations: {
+                y: {
+                    from: 650,
+                    duration: 2000,
+                }
+            },
+        },
+        hide: {
+            animation: {
+                duration: 0
+            }
         }
     },
     elements: {
@@ -11,7 +53,7 @@ export const options = {
             radius: 8,
             borderWidth: 2,
             hoverRadius: 12,
-            pointBorderColor: "#fff"
+            pointBorderColor: "#fff",
         }
     },
     plugins: {
@@ -19,15 +61,97 @@ export const options = {
             display: false
         },
         tooltip: {
+            // enabled: false,
+            // external: (context: { chart: Chart, tooltip: TooltipModel<"line">, replay: any }) => {
+            //     const { chart, tooltip } = context;
+            //     const tooltipEl = getOrCreateTooltip(chart);
+
+            //     // Hide if no tooltip
+            //     if (tooltip.opacity === 0) {
+            //         tooltipEl.style.opacity = 0;
+            //         return;
+            //     }
+
+            //     // // Set Text
+            //     if (tooltip.body) {
+            //         const titleLines = tooltip.title || [];
+            //         const bodyLines = tooltip.body.map(b => b.lines);
+
+            //         const tableHead = document.createElement('thead');
+
+            //         titleLines.forEach(title => {
+            //             const tr = document.createElement('tr');
+            //             tr.style.backgroundColor = "#ccc";
+            //             tr.style.textAlign="left";
+            //             tr.style.color = "#000";
+
+            //             const th = document.createElement('th');
+            //             th.style.borderWidth = "0";
+                        
+            //             const text = document.createTextNode(title);
+
+            //             th.appendChild(text);
+            //             tr.appendChild(th);
+            //             tableHead.appendChild(tr);
+            //         });
+
+            //         const tableBody = document.createElement('tbody');
+            //         tableBody.style.textAlign="left";
+            //         tableBody.style.color = "#000";
+            //         tableBody.style.backgroundColor = "#fff";
+            //         bodyLines.forEach((body, i) => {
+            //             const colors = tooltip.labelColors[i];
+
+            //             const span = document.createElement('span');
+            //             span.style.background = colors.backgroundColor + '';
+            //             span.style.borderColor = colors.borderColor + '';
+            //             span.style.marginRight = '10px';
+            //             span.style.height = '10px';
+            //             span.style.width = '10px';
+            //             span.style.display = 'inline-block';
+
+            //             const tr = document.createElement('tr');
+
+            //             const td = document.createElement('td');
+
+            //             const text = document.createTextNode(body[0]);
+
+            //             td.appendChild(span);
+            //             td.appendChild(text);
+            //             tr.appendChild(td);
+            //             tableBody.appendChild(tr);
+            //         });
+
+            //         const tableRoot = tooltipEl.querySelector('table');
+            //         // Remove old children
+            //         while (tableRoot.firstChild) {
+            //             tableRoot.firstChild.remove();
+            //         }
+            //         // Add new children
+            //         tableRoot.appendChild(tableHead);
+            //         tableRoot.appendChild(tableBody);
+            //     }
+
+            //     const { offsetLeft: positionX, offsetTop: positionY } = chart.canvas;
+
+            //     // Display, position, and set styles for font
+            //     tooltipEl.style.opacity = 1;
+            //     tooltipEl.style.left = positionX + tooltip.caretX + 'px';
+            //     tooltipEl.style.top = positionY + tooltip.caretY + 'px';
+            //     // tooltipEl.style.font = tooltip.options.bodyFont;
+            //     // tooltipEl.style.padding = tooltip.options.padding + 'px ' + tooltip.options.padding + 'px';
+            // },
             interaction: {
                 mode: "index" as const,
                 intersect: false
             },
             titleColor: "#000",
-            titleFont: { weight: "normal" },
+            titleFont: { weight: "bold" },
             backgroundColor: "#fff",
             bodyColor: "#000",
             usePointStyle: true,
+            bodySpacing: 10,
+            boxPadding: 5,
             callbacks: {
                 labelPointStyle: function () {
                     return {
@@ -35,24 +159,22 @@ export const options = {
                         rotation: 0
                     };
                 },
+                label: function (tooltipItems: TooltipItem<"line">) {
+                    if (tooltipItems.dataset.yAxisID === 'y') {
+                        return tooltipItems.dataset.label + ' ' + tooltipItems.formattedValue
+                    } else {
+                        return tooltipItems.dataset.label + ' ' + "$"+tooltipItems.formattedValue
+                    }
+                }
 
-            }
+            },
         },
         legend: {
             labels: {
                 usePointStyle: true,
-                pointStyle: "circle"
+                pointStyle: "circle",
             },
             position: "bottom" as const,
-            // disible click action
-            // onClick: function (event: any, legendItem: any, legend: any) {
-            //     console.log(event);
-            //     console.log(legendItem);
-            //     console.log(legend);
-            // },
-            // onHover: function (e: any) {
-            //     e.target.style.cursor = 'pointer';
-            // }
         },
         zoom: {
             zoom: {
@@ -73,7 +195,10 @@ export const options = {
             grid: {
                 display: false,
                 drawBorder: false,
-            }
+            },
+            ticks: {
+                color: "#ccc",
+            },
         },
         y: {
             position: "left" as const,
@@ -81,11 +206,13 @@ export const options = {
                 display: false,
                 drawBorder: false,
             },
-            min: 0,
             ticks: {
+                color: "#ccc",
                 stepSize: 30,
                 padding: 20
             },
+            beginAtZero: true,
+            max: 90,
         },
         y1: {
             position: "right" as const,
@@ -95,13 +222,16 @@ export const options = {
                 drawBorder: false,
             },
             ticks: {
+                color: "#ccc",
                 stepSize: 30,
                 padding: 20,
                 callback: function (value: any) {
                     return "$" + value;
                 }
             },
-            min: 0
+            beginAtZero: true,
+            max: 90,
+
         }
     }
 }
