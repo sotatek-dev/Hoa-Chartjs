@@ -1,5 +1,4 @@
-import { Chart, Tooltip, TooltipItem, TooltipModel } from "chart.js";
-import { Context } from "react";
+import { Chart, TooltipItem, TooltipModel } from "chart.js";
 const getOrCreateTooltip = (chart: any) => {
     let tooltipEl = chart.canvas.parentNode.querySelector('div');
 
@@ -61,112 +60,94 @@ export const options = {
             display: false
         },
         tooltip: {
-            // enabled: false,
-            // external: (context: { chart: Chart, tooltip: TooltipModel<"line">, replay: any }) => {
-            //     const { chart, tooltip } = context;
-            //     const tooltipEl = getOrCreateTooltip(chart);
-
-            //     // Hide if no tooltip
-            //     if (tooltip.opacity === 0) {
-            //         tooltipEl.style.opacity = 0;
-            //         return;
-            //     }
-
-            //     // // Set Text
-            //     if (tooltip.body) {
-            //         const titleLines = tooltip.title || [];
-            //         const bodyLines = tooltip.body.map(b => b.lines);
-
-            //         const tableHead = document.createElement('thead');
-
-            //         titleLines.forEach(title => {
-            //             const tr = document.createElement('tr');
-            //             tr.style.backgroundColor = "#ccc";
-            //             tr.style.textAlign="left";
-            //             tr.style.color = "#000";
-
-            //             const th = document.createElement('th');
-            //             th.style.borderWidth = "0";
-                        
-            //             const text = document.createTextNode(title);
-
-            //             th.appendChild(text);
-            //             tr.appendChild(th);
-            //             tableHead.appendChild(tr);
-            //         });
-
-            //         const tableBody = document.createElement('tbody');
-            //         tableBody.style.textAlign="left";
-            //         tableBody.style.color = "#000";
-            //         tableBody.style.backgroundColor = "#fff";
-            //         bodyLines.forEach((body, i) => {
-            //             const colors = tooltip.labelColors[i];
-
-            //             const span = document.createElement('span');
-            //             span.style.background = colors.backgroundColor + '';
-            //             span.style.borderColor = colors.borderColor + '';
-            //             span.style.marginRight = '10px';
-            //             span.style.height = '10px';
-            //             span.style.width = '10px';
-            //             span.style.display = 'inline-block';
-
-            //             const tr = document.createElement('tr');
-
-            //             const td = document.createElement('td');
-
-            //             const text = document.createTextNode(body[0]);
-
-            //             td.appendChild(span);
-            //             td.appendChild(text);
-            //             tr.appendChild(td);
-            //             tableBody.appendChild(tr);
-            //         });
-
-            //         const tableRoot = tooltipEl.querySelector('table');
-            //         // Remove old children
-            //         while (tableRoot.firstChild) {
-            //             tableRoot.firstChild.remove();
-            //         }
-            //         // Add new children
-            //         tableRoot.appendChild(tableHead);
-            //         tableRoot.appendChild(tableBody);
-            //     }
-
-            //     const { offsetLeft: positionX, offsetTop: positionY } = chart.canvas;
-
-            //     // Display, position, and set styles for font
-            //     tooltipEl.style.opacity = 1;
-            //     tooltipEl.style.left = positionX + tooltip.caretX + 'px';
-            //     tooltipEl.style.top = positionY + tooltip.caretY + 'px';
-            //     // tooltipEl.style.font = tooltip.options.bodyFont;
-            //     // tooltipEl.style.padding = tooltip.options.padding + 'px ' + tooltip.options.padding + 'px';
-            // },
             interaction: {
                 mode: "index" as const,
                 intersect: false
             },
-            titleColor: "#000",
-            titleFont: { weight: "bold" },
-            backgroundColor: "#fff",
-            bodyColor: "#000",
-            usePointStyle: true,
-            bodySpacing: 10,
-            boxPadding: 5,
             callbacks: {
-                labelPointStyle: function () {
-                    return {
-                        pointStyle: 'circle' as const,
-                        rotation: 0
-                    };
-                },
                 label: function (tooltipItems: TooltipItem<"line">) {
                     if (tooltipItems.dataset.yAxisID === 'y') {
                         return tooltipItems.dataset.label + ' ' + tooltipItems.formattedValue
                     } else {
-                        return tooltipItems.dataset.label + ' ' + "$"+tooltipItems.formattedValue
+                        return `${tooltipItems.dataset.label} $${tooltipItems.formattedValue}`
                     }
                 }
+            },
+            enabled: false,
+            external: (context: { chart: Chart, tooltip: TooltipModel<"line"> }) => {
+                const { chart, tooltip } = context;
+                const tooltipEl = getOrCreateTooltip(chart);
+                tooltipEl.classList.add('tooltip');
 
+                // Hide if no tooltip
+                if (tooltip.opacity === 0) {
+                    tooltipEl.style.opacity = 0;
+                    return;
+                }
+
+                // // Set Text
+                if (tooltip.body) {
+                    const titleLines = tooltip.title || [];
+                    const bodyLines = tooltip.body.map(b => b.lines);
+
+                    const tableHead = document.createElement('thead');
+
+                    titleLines.forEach(title => {
+                        const tr = document.createElement('tr');
+                        const th = document.createElement('th');
+                        const text = document.createTextNode(title);
+
+                        th.appendChild(text);
+                        tr.appendChild(th);
+                        tableHead.appendChild(tr);
+                    });
+
+                    const tableBody = document.createElement('tbody');
+                    tableBody.style.backgroundColor = "#fff";
+                    bodyLines.forEach((body, i) => {
+                        const colors = tooltip.labelColors[i];
+
+                        const span = document.createElement('span');
+                        span.classList.add('tooltip__body-text')
+                        span.style.background = colors.backgroundColor + '';
+                        span.style.borderColor = colors.borderColor + '';
+
+                        const tr = document.createElement('tr');
+                        const td = document.createElement('td');
+
+                        const textNormal = body[0].substring(0, body[0].lastIndexOf(" ")) + " ";
+                        const textBold = body[0].split(" ").pop() || '';
+                        const textNormalElement = document.createTextNode(textNormal.toString());
+                        const textBoldElement = document.createTextNode(textBold.toString());
+                        const strong = document.createElement('strong');
+                        const textSpan = document.createElement('span');
+                        strong.appendChild(textBoldElement);
+                        textSpan.appendChild(textNormalElement);
+                        textSpan.appendChild(strong);
+                        textSpan.style.marginRight = '8px';
+
+                        td.appendChild(span);
+                        td.appendChild(textSpan);
+                        tr.appendChild(td);
+                        tableBody.appendChild(tr);
+                    });
+
+                    const tableRoot = tooltipEl.querySelector('table');
+                    // Remove old children
+                    while (tableRoot.firstChild) {
+                        tableRoot.firstChild.remove();
+                    }
+                    // Add new children
+                    tableRoot.appendChild(tableHead);
+                    tableRoot.appendChild(tableBody);
+                }
+
+                const { offsetLeft: positionX, offsetTop: positionY } = chart.canvas;
+
+                // Display, position
+                tooltipEl.style.opacity = 1;
+                tooltipEl.style.left = positionX + tooltip.caretX + 'px';
+                tooltipEl.style.top = positionY + tooltip.caretY + 'px';
             },
         },
         legend: {
