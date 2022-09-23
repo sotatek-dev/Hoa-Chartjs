@@ -1,7 +1,4 @@
-table,
-th,
-td,
-tr {
+table {
     border-collapse: collapse;
 }
 
@@ -10,9 +7,13 @@ canvas+div {
 }
 
 .tooltip {
+    opacity: 1;
     color: #000 !important;
     text-align: left;
     background: none !important;
+    border-radius: 5px;
+    overflow: hidden;
+    perspective: 1px;
 }
 
 .tooltip__body-text {
