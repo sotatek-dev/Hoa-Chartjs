@@ -10,7 +10,6 @@ canvas+div {
 }
 
 .tooltip {
-    opacity: 1 !important;
     color: #000 !important;
     text-align: left;
     background: none !important;
